@@ -1,13 +1,15 @@
 import pandas as pd
 import telebot
 import zipfile
-from pyunpack import Archive
+
+import work_with_cvs
+# from pyunpack import Archive
 
 from work_with_cvs import *
 
 bot = telebot.TeleBot('5944321076:AAErW98ZKZUm-D8zMpxqtCbMF6JF_DMQlHA')
 
-user_white_list = [6268363941]
+user_white_list = [6268363941, 315540688]
 check = False
 
 
@@ -15,6 +17,7 @@ check = False
 def start(message):
     global check
     user_id = message.from_user.id
+    print(user_id)
     if user_id in user_white_list:
         bot.send_message(message.chat.id, "Вы приняты")
         check = True
@@ -38,12 +41,18 @@ def handle_docs_photo(message):
         file_info = bot.get_file(message.document.file_id)
         downloaded_file = bot.download_file(file_info.file_path)
         name_file = message.document.file_name
+        print('file name: ' + name_file)
 
-        path = 'C:/Users/ArVip/Desktop/1/' + name_file
+        path = 'C:/Users/vkuzn/Desktop/vkr/' + name_file
+
+        print('path: ' + path)
         with open(path, 'wb') as new_file:
             new_file.write(downloaded_file)
 
         bot.reply_to(message, "Пожалуй, я сохраню это")
+
+        print('executing main')
+        len = work_with_cvs.main(path)
 
         # if not (".csv" in name_file):
         #     Archive(src).extractall(path)
@@ -52,7 +61,8 @@ def handle_docs_photo(message):
         # for file in stories_zip.namelist():
         #     bot.send_message(message.chat.id, {stories_zip.getinfo(file).filename})
 
-        bot.send_message(message.chat.id, {name_file})
+        # bot.send_message(message.chat.id, {name_file})
+        bot.send_message(message.chat.id, len)
         # bot.send_message(message.chat.id, {src})
 
         # csv_data = pd.read_csv(r'C:/Users/ArVip/Desktop/1/' + name_file, delimiter=';', encoding="",
@@ -75,3 +85,4 @@ def handle_docs_photo(message):
 
 
 bot.polling(none_stop=True)
+print('BOT STARTED')

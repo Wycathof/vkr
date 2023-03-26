@@ -6,9 +6,9 @@ from warnings import simplefilter
 
 simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
-path = r"C:\Users\ArVip\PycharmProjects\nirs\csvpack\block.csv"
+# path = r"C:\Users\vkuzn\Desktop\vkr\realdata.csv"
 
-start_time = datetime.now()
+# start_time = datetime.now()
 
 
 def read_data(path):
@@ -22,8 +22,8 @@ def read_data(path):
     return csv_data
 
 
-csv_data = read_data(path)
-pprint.pprint(len(csv_data))
+# csv_data = read_data(path)
+# pprint.pprint(len(csv_data))
 
 
 # pprint.pprint(len(csv_data)) #len 39 -------------------------------------------------------------------------
@@ -34,9 +34,8 @@ def to_json_object(csv_data, new_dict):
     return new_dict
 
 
-new_dict = {}
-new_dict = to_json_object(csv_data, new_dict)
-# pprint.pprint(len(new_dict)) #len 39 -------------------------------------------------------------------------
+# new_dict = {}
+# new_dict = to_json_object(csv_data, new_dict)
 
 
 def find_only(new_dict, list_msg, list_target_host_name):
@@ -46,18 +45,14 @@ def find_only(new_dict, list_msg, list_target_host_name):
     return new_dict, list_msg, list_target_host_name
 
 
-list_msg = []
-list_target_host_name = []
-find_only(new_dict, list_msg, list_target_host_name)
-csv_data["msgid"] = list_msg
-csv_data["target_host_name"] = list_target_host_name
-unique_msgid = csv_data['msgid'].value_counts()
-unique_target_host_name = csv_data['target_host_name'].value_counts()
+# list_msg = []
+# list_target_host_name = []
+# find_only(new_dict, list_msg, list_target_host_name)
+# csv_data["msgid"] = list_msg
+# csv_data["target_host_name"] = list_target_host_name
+# unique_msgid = csv_data['msgid'].value_counts()
+# unique_target_host_name = csv_data['target_host_name'].value_counts()
 
-
-# print(unique_msgid)  # 4625 - 31,  4103 - 4, {'text': '800', 'Qualifiers': '0'}  -   4 -------------------------
-# print(unique_target_host_name)
-# print(csv_data)
 
 def drop_not_win_aud(csv_data, new_dict):
     for i, body in enumerate(new_dict):
@@ -67,19 +62,19 @@ def drop_not_win_aud(csv_data, new_dict):
     return csv_data
 
 
-csv_data = drop_not_win_aud(csv_data, new_dict)
+# csv_data = drop_not_win_aud(csv_data, new_dict)
 
-# pprint.pprint(len(csv_data)) #len 31 --------------------------
-unique_msgid = csv_data['msgid'].value_counts()
-# print(unique_msgid) # 4625 - 31
-
-csv_data.columns = csv_data.columns.str.replace('п»ї"time"', 'time')
-
-new_dict_new = {}
-new_dict_new = to_json_object(csv_data, new_dict_new)
-
-
-# pprint.pprint(len(new_dict_new)) #len 31 --------------------------
+# # pprint.pprint(len(csv_data)) #len 31 --------------------------
+# unique_msgid = csv_data['msgid'].value_counts()
+# # print(unique_msgid) # 4625 - 31
+#
+# csv_data.columns = csv_data.columns.str.replace('п»ї"time"', 'time')
+#
+# new_dict_new = {}
+# new_dict_new = to_json_object(csv_data, new_dict_new)
+#
+#
+# # pprint.pprint(len(new_dict_new)) #len 31 --------------------------
 
 def find(new_dict_new, new_find_value, return_list, index):
     key_in_body = []
@@ -120,10 +115,10 @@ def crate_dict_with_one_body_unique_msgid(arr_unique_body, csv_data):
     return arr_unique_body
 
 
-arr_unique_body = {}
-arr_unique_body = crate_dict_with_one_body_unique_msgid(arr_unique_body, csv_data)
-
-name_coloumn = []
+# arr_unique_body = {}
+# arr_unique_body = crate_dict_with_one_body_unique_msgid(arr_unique_body, csv_data)
+#
+# name_coloumn = []
 
 
 def getting_column_names(arr_unique_body, name_coloumn):
@@ -146,8 +141,8 @@ def getting_column_names2(arr_unique_body, name_coloumn):
     return name_coloumn
 
 
-return_list = []
-name_coloumn = getting_column_names(arr_unique_body, name_coloumn)
+# return_list = []
+# name_coloumn = getting_column_names(arr_unique_body, name_coloumn)
 
 
 def insert_in_df2(csv_data, name_coloumn):
@@ -158,7 +153,7 @@ def insert_in_df2(csv_data, name_coloumn):
         csv_data[name] = return_list
 
 
-def insert_in_df(csv_data, name_coloumn):
+def insert_in_df(csv_data, name_coloumn, new_dict_new):
     for ind, name in enumerate(name_coloumn):
         return_list = []
         for i, body in enumerate(new_dict_new):
@@ -166,11 +161,56 @@ def insert_in_df(csv_data, name_coloumn):
         csv_data.insert(ind + 6, name, return_list)
 
 
-insert_in_df(csv_data, name_coloumn)
+# insert_in_df(csv_data, name_coloumn)
+#
+# # ----------
+# pd.set_option('display.max_rows', None)
+# abc = len(csv_data["msgid"])
+# # ----------
+# print("Время выполнения", datetime.now() - start_time)
 
-# ----------
-pd.set_option('display.max_rows', None)
-abc = len(csv_data["msgid"])
-# ----------
-print("Время выполнения", datetime.now() - start_time)
+def main(path: str):
+    start_time = datetime.now()
+    csv_data = read_data(path)
+
+    # pprint.pprint(len(csv_data))
+
+    new_dict = {}
+    new_dict = to_json_object(csv_data, new_dict)
+    list_msg = []
+    list_target_host_name = []
+    new_dict, list_msg, list_target_host_name = find_only(new_dict, list_msg, list_target_host_name)
+    csv_data["msgid"] = list_msg
+    csv_data["target_host_name"] = list_target_host_name
+    unique_msgid = csv_data['msgid'].value_counts()
+    unique_target_host_name = csv_data['target_host_name'].value_counts()
+    csv_data = drop_not_win_aud(csv_data, new_dict)
+
+    unique_msgid = csv_data['msgid'].value_counts()
+    # print(unique_msgid) # 4625 - 31
+
+    csv_data.columns = csv_data.columns.str.replace('п»ї"time"', 'time')
+
+    new_dict_new = {}
+    new_dict_new = to_json_object(csv_data, new_dict_new)
+
+    # pprint.pprint(len(new_dict_new)) #len 31 --------------------------
+
+    arr_unique_body = {}
+    arr_unique_body = crate_dict_with_one_body_unique_msgid(arr_unique_body, csv_data)
+
+    name_coloumn = []
+
+    return_list = []
+    name_coloumn = getting_column_names(arr_unique_body, name_coloumn)
+
+    insert_in_df(csv_data, name_coloumn, new_dict_new)
+
+    # ----------
+    pd.set_option('display.max_rows', None)
+
+    # ----------
+    print("Время выполнения", datetime.now() - start_time)
+
+    return len(csv_data["msgid"])
 
