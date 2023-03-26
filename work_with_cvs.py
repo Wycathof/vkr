@@ -6,7 +6,6 @@ from warnings import simplefilter
 
 simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
-# path = r"C:\Users\vkuzn\Desktop\vkr\realdata.csv"
 
 # start_time = datetime.now()
 

@@ -43,7 +43,7 @@ def handle_docs_photo(message):
         name_file = message.document.file_name
         print('file name: ' + name_file)
 
-        path = 'C:/Users/vkuzn/Desktop/vkr/' + name_file
+        path = 'C:/Users/ArVip/Desktop/1' + name_file
 
         print('path: ' + path)
         with open(path, 'wb') as new_file:
