@@ -4,8 +4,10 @@ from datetime import datetime
 import pandas as pd
 from warnings import simplefilter
 
+
 simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
-# path = r"C:\Users\ArVip\PycharmProjects\nirs\csvpack\block.csv"
+# path = r"C:\Users\ArVip\PycharmProjects\nirs\csvpack\246203tri.csv"
+# mapa = {"password": False, "block": True}
 
 def read_data(path):
     csv_data = pd.read_csv(path, delimiter=';', encoding="", encoding_errors="ignore")
@@ -102,7 +104,18 @@ def find_name_and_count_cd(all_count, all_name):
         itog += f"•{q} - {all_count_arr[i]} событий\n"
     return itog
 
-def main(path):
+def print4740 (csv_data):
+
+    result1_str = f"За последние сутки зафиксировано многочисленные блокировки УЗ {csv_data[csv_data['msgid'] == '4740']['TargetUserName'].unique()[0]} на контроллерах домена:\n" \
+                 f"{find_name_and_count_cd(csv_data[csv_data['msgid'] == '4740']['Computer'].value_counts(), csv_data[csv_data['msgid'] == '4740']['Computer'].unique())}\n" \
+                 f"Хосты инициаторы блокировок:\n" \
+                 f"{find_name_and_count_cd(csv_data[csv_data['msgid'] == '4740']['TargetDomainName'].value_counts(), csv_data[csv_data['msgid'] == '4740']['TargetDomainName'].unique())}\n" \
+                 f"За период с {csv_data[csv_data['msgid'] == '4740']['time'][csv_data[csv_data['msgid'] == '4740']['time'].index[-1]]} по {csv_data[csv_data['msgid'] == '4740']['time'][csv_data[csv_data['msgid'] == '4740']['time'].index[0]]} зафиксировано " \
+                 f"{csv_data[csv_data['msgid'] == '4740']['time'].count()} событий.\nДанное время указано в формате UTC-0."
+    return result1_str
+
+
+def main(path, data_flag):
     start_time = datetime.now()
 
     csv_data = read_data(path)
@@ -142,26 +155,20 @@ def main(path):
     # ----------
     pd.set_option('display.max_rows', None)
     pd.set_option('display.max_columns', None)
-
     # ----------
 
+    if data_flag == "block":
+        print(data_flag)
+        result_str = print4740(csv_data)
+    if data_flag == "password":
+        print(data_flag)
+        result_str = "ebalau"
 
-    result_str = f"За последние сутки зафиксировано многочисленные блокировки УЗ {csv_data[csv_data['msgid'] == '4740']['TargetUserName'].unique()[0]} на контроллерах домена:\n" \
-                 f"{find_name_and_count_cd(csv_data[csv_data['msgid'] == '4740']['Computer'].value_counts(), csv_data[csv_data['msgid'] == '4740']['Computer'].unique())}" \
-                 f"Хосты инициаторы блокировок:\n" \
-                 f"{find_name_and_count_cd(csv_data[csv_data['msgid'] == '4740']['TargetDomainName'].value_counts(), csv_data[csv_data['msgid'] == '4740']['TargetDomainName'].unique())}"
+    print("dalay 1s" )
+
     # print(result_str)
-
-
+    # print(csv_data[csv_data['msgid'] == '4740']['time'])
     print("Время выполнения", datetime.now() - start_time)
     return result_str
 
-def pizda5():
-    itog = "Ваша строка: 5"
-    return itog
-
-def pizda10():
-    itog = "Ваша строка: 10"
-    return itog
-
-# main(path)
+# main(path, mapa)
