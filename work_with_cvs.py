@@ -4,13 +4,25 @@ from datetime import datetime
 import pandas as pd
 from warnings import simplefilter
 
-
 simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
-# path = r"C:\Users\ArVip\PycharmProjects\nirs\csvpack\246203tri.csv"
-# mapa = {"password": False, "block": True}
+path = r"C:\Users\ArVip\PycharmProjects\nirs\csvresult\test2.csv"  # большая
 
-def read_data(path):
+
+# path = r"C:\Users\ArVip\PycharmProjects\nirs\csvpack\block.csv"
+
+def read_data_csv(path):
     csv_data = pd.read_csv(path, delimiter=';', encoding="", encoding_errors="ignore")
+    for i, body in enumerate(csv_data['body']):
+        start = '{"Event"'
+        check = body.startswith(start)
+        if not check:
+            csv_data = csv_data.drop(index=i)
+    csv_data.reset_index(drop=True, inplace=True)
+    return csv_data
+
+
+def read_data_xlsx(path):
+    csv_data = pd.read_excel(path, engine="openpyxl")
     for i, body in enumerate(csv_data['body']):
         start = '{"Event"'
         check = body.startswith(start)
@@ -84,6 +96,7 @@ def insert_in_df2(csv_data, name_coloumn, new_dict_new):
             find(new_dict_new[i]["Event"]["EventData"]["Data"], name, return_list, i)
         csv_data.insert(ind + 6, name, return_list)
 
+
 def insert_in_df(csv_data, name_coloumn, new_dict_new):
     for name in name_coloumn:
         return_list = []
@@ -91,34 +104,88 @@ def insert_in_df(csv_data, name_coloumn, new_dict_new):
             find(new_dict_new[i]["Event"]["EventData"]["Data"], name, return_list, i)
         csv_data[name] = return_list
 
-def find_name_and_count_cd(all_count, all_name):
-    all_count_arr = []
-    all_name_arr = []
 
-    itog = ""
-    for i in all_count:
-        all_count_arr.append(i)
-    for a in all_name:
-        all_name_arr.append(a)
-    for i, q in enumerate(all_name_arr):
-        itog += f"•{q} - {all_count_arr[i]} событий\n"
-    return itog
+def find_name_and_count_2(data, msg, change_str):
+    dict = data.to_dict()
+    itog_str = ""
 
-def print4740 (csv_data):
+    for d in dict:
+        d_copy = d
+        if change_str is True:
+            if d.find("::ffff") != -1:
+                d = d.replace("::ffff:", "")
+            if d == "0x12":
+                d = d.replace("0x12", "Account disabled, expired, locked out, logon hours")
+            if d == "0x18":
+                d = d.replace("0x18", "Usually means bad password")
+            if d == "0x17":
+                d = d.replace("0x17", "The user’s password has expired")
+        itog_str += f"• {d} - {dict[d_copy]} событий" \
+                    f"\n"
+    return itog_str.lower()
 
-    result1_str = f"За последние сутки зафиксировано многочисленные блокировки УЗ {csv_data[csv_data['msgid'] == '4740']['TargetUserName'].unique()[0]} на контроллерах домена:\n" \
-                 f"{find_name_and_count_cd(csv_data[csv_data['msgid'] == '4740']['Computer'].value_counts(), csv_data[csv_data['msgid'] == '4740']['Computer'].unique())}\n" \
-                 f"Хосты инициаторы блокировок:\n" \
-                 f"{find_name_and_count_cd(csv_data[csv_data['msgid'] == '4740']['TargetDomainName'].value_counts(), csv_data[csv_data['msgid'] == '4740']['TargetDomainName'].unique())}\n" \
-                 f"За период с {csv_data[csv_data['msgid'] == '4740']['time'][csv_data[csv_data['msgid'] == '4740']['time'].index[-1]]} по {csv_data[csv_data['msgid'] == '4740']['time'][csv_data[csv_data['msgid'] == '4740']['time'].index[0]]} зафиксировано " \
-                 f"{csv_data[csv_data['msgid'] == '4740']['time'].count()} событий.\nДанное время указано в формате UTC-0."
-    return result1_str
+def find_name_and_count_(data, msg, change_str):
+    dict = data.to_dict()
+    itog_str = ""
+
+    for d in dict:
+        d_copy = d
+        print(d)
+        if change_str is True:
+            if d.find("::ffff") != -1:
+                d = d.replace("::ffff:", "")
+            if d == "0x12":
+                d = d.replace("0x12", "Account disabled, expired, locked out, logon hours")
+            if d == "0x18":
+                d = d.replace("0x18", "Usually means bad password")
+            if d == "0x17":
+                d = d.replace("0x17", "The user’s password has expired")
+        itog_str += f"• {d} - {dict[d_copy]} событий" \
+                    f"\n"
+    return itog_str.lower()
 
 
-def main(path, data_flag):
+# def find_name_ind_ip (data):
+
+
+# def print4740(csv_data):
+#     result4740_str = f"Зафиксированы многочисленные блокировки УЗ {csv_data[csv_data['msgid'] == '4740']['TargetUserName'].unique()[0]} на контроллере(ах) домена:\n" \
+#                      f"{find_name_and_count_(csv_data[csv_data['msgid'] == '4740']['Computer'].value_counts(), msg=4740, change_str=False)}\n" \
+#                      f"Хост(ы) инициатор(ы) блокировок:\n" \
+#                      f"{find_name_and_count_(csv_data[csv_data['msgid'] == '4740']['TargetDomainName'].value_counts(), msg=4740, change_str=False)}\n" \
+#                      f"За период с 26.11.2022 13:46:57 по 27.11.2022 10:33:14 зафиксировано " \
+#                      f"{csv_data[csv_data['msgid'] == '4740']['time'].count()} событий.\nДанное время указано в формате UTC-0.\n\n"
+#     return result4740_str
+
+
+# "За период с {csv_data[csv_data['msgid'] == '4740']['time'][csv_data[csv_data['msgid'] == '4740']['time'].index[-1]]} по {csv_data[csv_data['msgid'] == '4740']['time'][csv_data[csv_data['msgid'] == '4740']['time'].index[0]]} зафиксировано " \
+#                      f"{csv_data[csv_data['msgid'] == '4740']['time'].count()} событий.\nДанное время указано в формате UTC-0.\n\n"
+# def print4771(csv_data):
+#     result4771_str = f"афиксированы неуспешные попытки преаутентификации Kerberos УЗ {csv_data[csv_data['msgid'] == '4771']['TargetUserName'].unique()[0]} на хосте(-ах):\n" \
+#                      f"{find_name_and_count_(csv_data[csv_data['msgid'] == '4771']['IpAddress'].value_counts(), msg=4771, change_str=True)} " \
+#                      f"События зафиксированы на контроллере(-ах) домена:\n{find_name_and_count_(csv_data[csv_data['msgid'] == '4771']['Computer'].value_counts(), msg=4771, change_str=False)} " \
+#                      f"\nЗа период с 26.11.2022 13:47:08 по 27.11.2022 10:32:58 зафиксировано " \
+#                      f"{csv_data[csv_data['msgid'] == '4771']['time'].count()} событий.\nДанное время указано в формате UTC-0.\n" \
+#                      f"Причины неуспешности:\n{find_name_and_count_(csv_data[csv_data['msgid'] == '4771']['Status'].value_counts(), msg=4771, change_str=True)}\n\n"
+#
+#     return result4771_str
+
+
+def print4625(csv_data):
+    result4625_str = f" Зафиксированы неуспешные попытки аутентификации по SMB (тип входа: {csv_data[csv_data['msgid'] == '4625']['LogonType'].unique()[0]}, Пакет аутентификации: {csv_data[csv_data['msgid'] == '4625']['AuthenticationPackageName'].unique()[0]}) " \
+                     f"на хосте(-ах):\n{find_name_and_count_(csv_data[csv_data['msgid'] == '4625']['Computer'].value_counts(), msg=4625, change_str=False)}" \
+                     f"\n С хостов:\n{find_name_and_count_(csv_data[csv_data['msgid'] == '4625']['WorkstationName'].value_counts(), msg=4625, change_str=False)} "
+    return result4625_str
+
+
+def main(path):
+    # def main(path, data_flag, name_file_test, result_str=""):
     start_time = datetime.now()
-
-    csv_data = read_data(path)
+    csv_data = read_data_csv(path)
+    # if ".csv" in name_file_test:
+    #     csv_data = read_data_csv(path)
+    # if ".xlsx" in name_file_test:
+    #     csv_data = read_data_xlsx(path)
     new_dict = {}
     new_dict = to_json_object(csv_data, new_dict)
 
@@ -129,11 +196,7 @@ def main(path, data_flag):
     csv_data["Computer"] = list_target_host_name
 
     unique_msgid = csv_data['msgid'].value_counts()
-    unique_target_host_name = csv_data['Computer'].value_counts()
     csv_data = drop_not_win_aud(csv_data, new_dict)
-
-    unique_msgid = csv_data['msgid'].value_counts()
-    # print(unique_msgid) # 4625 - 31
 
     csv_data.columns = csv_data.columns.str.replace('п»ї"time"', 'time')
 
@@ -151,24 +214,29 @@ def main(path, data_flag):
     name_coloumn = getting_column_names(arr_unique_body, name_coloumn)
 
     insert_in_df(csv_data, name_coloumn, new_dict_new)
+    unique_msgid_value = csv_data['msgid'].unique()
 
     # ----------
     pd.set_option('display.max_rows', None)
     pd.set_option('display.max_columns', None)
     # ----------
 
-    if data_flag == "block":
-        print(data_flag)
-        result_str = print4740(csv_data)
-    if data_flag == "password":
-        print(data_flag)
-        result_str = "ebalau"
+    # if data_flag == "block":
+    #     print(data_flag)
+    #     if "4740" in unique_msgid_value:
+    #         result_str += f"{print4740(csv_data)}"
+    #     if "4771" in unique_msgid_value:
+    #         result_str += f"Также, з{print4771(csv_data)}"
+    #     if "4625" or "4625" in unique_msgid_value:
+    #         result_str += f"Также,{print4625(csv_data)}"
+    # if data_flag == "password":
+    #     print(data_flag)
+    #     result_str = "ebalau"
 
-    print("dalay 1s" )
+    print(print4625(csv_data))
 
-    # print(result_str)
-    # print(csv_data[csv_data['msgid'] == '4740']['time'])
     print("Время выполнения", datetime.now() - start_time)
-    return result_str
+    # return result_str
 
-# main(path, mapa)
+
+main(path)

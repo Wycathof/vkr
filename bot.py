@@ -1,15 +1,14 @@
-import pandas as pd
 import telebot
 from telebot import types
 import sqlite3
-import zipfile
-
-import work_with_cvs
-# from pyunpack import Archive
-
+from zipfile import ZipFile
+from pathlib import *
 from work_with_cvs import *
+#rasa
 
 bot = telebot.TeleBot('5944321076:AAErW98ZKZUm-D8zMpxqtCbMF6JF_DMQlHA')
+
+
 # 356883896 - катя
 # 6268363941 - я
 # 315540688 - vadim
@@ -33,8 +32,9 @@ def first_start(message, user_id):
     kb = types.InlineKeyboardMarkup()
     btn1 = types.InlineKeyboardButton(text='Написать создателю 🤡', url="https://t.me/qumin163")
     kb.add(btn1)
-    bot.send_message(message.chat.id, f"Напишите мне для предоставления доступа к боту.\nВаш ID: {user_id}",
-                     reply_markup=kb)
+    bot.send_message(message.chat.id,
+                     f"Напишите мне для предоставления доступа к боту.\nВаш ID: <code>{user_id}</code>",
+                     reply_markup=kb, parse_mode='html')
 
 
 @bot.message_handler(commands=['start'])
@@ -66,7 +66,8 @@ def help(message):
                          "\n\nСовсем забыл сказать...\nОбязательно, чтобы в выгрузке была колока <b><u>body</u></b>",
                          parse_mode='html')
         bot.send_message(message.chat.id,
-                         "Чтобы начать выбери ниже какой тип инцидента ты хочeшь обработать ⬇\n(Если кнопочек нет, то жми /start)")
+                         "Чтобы начать выбери ниже какой тип инцидента ты хочeшь обработать ⬇\n(Если кнопочек нет, "
+                         "то жми /start)")
     else:
         first_start(message, user_id)
 
@@ -75,46 +76,62 @@ def help(message):
 def insert(message):
     user_id = message.from_user.id
     flag = "NULL"
-    if user_id == 6268363941:
-        status = extract_arg(message.text)
+    try:
+        if user_id == 6268363941:
+            status = extract_arg(message.text)
 
-        connect = sqlite3.connect('users.db')
-        cursor = connect.cursor()
-        cursor.execute("""CREATE TABLE IF NOT EXISTS login_id(
-            id INTEGER,
-            flag TEXT,
-            fio TEXT,
-            whoappend TEXT
-        )""")
-        connect.commit()
-        users_list = [status[0], flag, status[1], message.from_user.username]
-        cursor.execute(f"SELECT id FROM login_id WHERE id = {users_list[0]}")
-        data_id = cursor.fetchone()
-        # cursor.execute(f"SELECT flag FROM login_id WHERE id = {users_list[0]}")
-        # data_flag = cursor.fetchone()
-        if data_id is None:
-            cursor.execute("INSERT INTO login_id VALUES(?, ?, ?, ?);", users_list)
+            connect = sqlite3.connect('users.db')
+            cursor = connect.cursor()
+            cursor.execute("""CREATE TABLE IF NOT EXISTS login_id(
+                id INTEGER,
+                flag TEXT,
+                fio TEXT,
+                whoappend TEXT
+            )""")
             connect.commit()
-        else:
-            bot.send_message(message.chat.id, f"Пользователь с данным {data_id[0]} уже есть")
-            # bot.send_message(message.chat.id, data_flag)
+            users_list = [status[0], flag, status[1], message.from_user.username]
+            cursor.execute(f"SELECT id FROM login_id WHERE id = {users_list[0]}")
+            data_id = cursor.fetchone()
+            # cursor.execute(f"SELECT flag FROM login_id WHERE id = {users_list[0]}")
+            # data_flag = cursor.fetchone()
+            if data_id is None:
+                cursor.execute("INSERT INTO login_id VALUES(?, ?, ?, ?);", users_list)
+                bot.send_message(message.chat.id, "Добавил")
+                connect.commit()
+            else:
+                bot.send_message(message.chat.id, f"Пользователь с данным {data_id[0]} уже есть")
+                # bot.send_message(message.chat.id, data_flag)
 
-    else:
-        bot.send_message(message.chat.id, "У тебя нет доступа. К сожалению и не будет, потому что админская команда.")
+        else:
+            bot.send_message(message.chat.id, "У тебя нет доступа. К сожалению и не будет, потому что админская "
+                                              "команда.")
+    except IndexError:
+        bot.reply_to(message, "Забыл указать id или ФИО")
+    except Exception as e:
+        bot.reply_to(message, e)
 
 
 @bot.message_handler(commands=['delete'])
 def insert(message):
     user_id = message.from_user.id
-    if user_id == 6268363941:
-        status = extract_arg(message.text)
-        connect = sqlite3.connect('users.db')
-        cursor = connect.cursor()
+    try:
+        if user_id == 6268363941:
 
-        cursor.execute(f"DELETE FROM login_id WHERE id = {status[0]}")
-        connect.commit()
-    else:
-        bot.send_message(message.chat.id, "У тебя нет доступа. К сожалению и не будет, потому что админская команда.")
+            status = extract_arg(message.text)
+            connect = sqlite3.connect('users.db')
+            cursor = connect.cursor()
+
+            cursor.execute(f"DELETE FROM login_id WHERE id = {status[0]}")
+            bot.send_message(message.chat.id, "Удалил")
+            connect.commit()
+        else:
+            bot.send_message(message.chat.id,
+                             "У тебя нет доступа. К сожалению и не будет, потому что админская команда.")
+    except IndexError:
+        bot.reply_to(message, "Забыл указать id")
+    except Exception as e:
+        bot.reply_to(message, e)
+
 
 @bot.message_handler(commands=['showall'])
 def insert(message):
@@ -143,7 +160,9 @@ def message_reply(message):
 
             cursor.execute(f"UPDATE login_id SET flag =? WHERE id =?", ("password", user_id))
             connect.commit()
-            bot.send_message(message.chat.id, "Еблан1")
+            bot.send_message(message.chat.id,
+                             "Отлично!\nТеперь я от вас жду выгрузку по инциденту\n<b>ПОПЫТКИ ПОДБОРА ПАРОЛЯ</b>",
+                             parse_mode='html')
 
         elif message.text == 'Блокировки УЗ':
             connect = sqlite3.connect('users.db')
@@ -151,14 +170,16 @@ def message_reply(message):
 
             cursor.execute(f"UPDATE login_id SET flag =? WHERE id =?", ("block", user_id))
             connect.commit()
-            bot.send_message(message.chat.id, "Еблан2")
+            bot.send_message(message.chat.id,
+                             "Отлично!\nТеперь я от вас жду выгрузку по инциденту\n<b>БЛОКИРОВКИ УЗ</b>",
+                             parse_mode='html')
+
     else:
         first_start(message, user_id)
 
 
 @bot.message_handler(content_types=['document'])
 def document(message):
-    start_time_bot = datetime.now()
     user_id = message.from_user.id
     if check_status(user_id):
         try:
@@ -168,14 +189,23 @@ def document(message):
             downloaded_file = bot.download_file(file_info.file_path)
             name_file = message.document.file_name
             print('file name: ' + name_file)
-
             path = 'C:/Users/ArVip/Desktop/1/' + name_file
-
-            print('path: ' + path)
             with open(path, 'wb') as new_file:
                 new_file.write(downloaded_file)
+            name_file_test = ""
+            bot.reply_to(message, "Анализирую...")
+            if name_file.find(".zip") != -1:                                                      #разобраться как работает суфикс
+                with ZipFile(f'C:/Users/ArVip/Desktop/1/' + name_file, 'r') as f:
+                    f.extractall('C:/Users/ArVip/Desktop/1/')
+                    for item in f.infolist():
+                        name_file = item.filename
+            # with ZipFile(f'C:/Users/ArVip/Desktop/1/' + name_file, 'r') as f:
+            #     f.extractall('C:/Users/ArVip/Desktop/1/')
+            #     for item in f.infolist():
+            #         name_file = item.filename
+            print('path: ' + path)
+            print(f'name_file_test: {name_file}')
 
-            bot.reply_to(message, "Пожалуй, я сохраню это")
 
             print('executing main')
             connect = sqlite3.connect('users.db')
@@ -185,19 +215,23 @@ def document(message):
             data_flag = cursor.fetchone()
             print(data_flag[0])
 
-            bot.send_message(message.chat.id, main(path, data_flag[0]))
+
+            path = 'C:/Users/ArVip/Desktop/1/' + name_file
+            print('path to main', path)
+
+            start_time_bot = datetime.now()
+            bot.send_message(message.chat.id, main(path, data_flag[0], name_file))
+            bot.send_message(message.chat.id, f"Время выполнения: {datetime.now() - start_time_bot}")
 
 
         except pd.errors.ParserError:
-            bot.reply_to(message, "Не могу прочитать файл, который вы отправили.\nЯ принимаю .csv или .zip")
+            bot.reply_to(message, "Не могу прочитать файл, который вы отправили.\nЯ принимаю .csv, .xlsx или .zip")
 
         except Exception as e:
             if str(e) == "'body'":
                 bot.reply_to(message, 'Вы забыли выгрузить поле "body" 🫤')
             else:
                 bot.reply_to(message, e)
-                print(type(str(e)))
-
 
 
     else:
