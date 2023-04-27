@@ -194,7 +194,7 @@ def document(message):
                 new_file.write(downloaded_file)
             name_file_test = ""
             bot.reply_to(message, "Анализирую...")
-            if name_file.find(".zip") != -1:                                                      #разобраться как работает суфикс
+            if name_file.find(".zip") != -1:                                                      #разобраться как работает суфик
                 with ZipFile(f'C:/Users/ArVip/Desktop/1/' + name_file, 'r') as f:
                     f.extractall('C:/Users/ArVip/Desktop/1/')
                     for item in f.infolist():
