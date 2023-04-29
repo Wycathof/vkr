@@ -92,15 +92,13 @@ def insert(message):
             users_list = [status[0], flag, status[1], message.from_user.username]
             cursor.execute(f"SELECT id FROM login_id WHERE id = {users_list[0]}")
             data_id = cursor.fetchone()
-            # cursor.execute(f"SELECT flag FROM login_id WHERE id = {users_list[0]}")
-            # data_flag = cursor.fetchone()
+
             if data_id is None:
                 cursor.execute("INSERT INTO login_id VALUES(?, ?, ?, ?);", users_list)
                 bot.send_message(message.chat.id, "Добавил")
                 connect.commit()
             else:
                 bot.send_message(message.chat.id, f"Пользователь с данным {data_id[0]} уже есть")
-                # bot.send_message(message.chat.id, data_flag)
 
         else:
             bot.send_message(message.chat.id, "У тебя нет доступа. К сожалению и не будет, потому что админская "
@@ -112,7 +110,7 @@ def insert(message):
 
 
 @bot.message_handler(commands=['delete'])
-def insert(message):
+def delete(message):
     user_id = message.from_user.id
     try:
         if user_id == 6268363941:
@@ -134,7 +132,7 @@ def insert(message):
 
 
 @bot.message_handler(commands=['showall'])
-def insert(message):
+def showall(message):
     user_id = message.from_user.id
     if user_id == 6268363941:
         connect = sqlite3.connect('users.db')
@@ -188,7 +186,7 @@ def document(message):
             file_info = bot.get_file(message.document.file_id)
             downloaded_file = bot.download_file(file_info.file_path)
             name_file = message.document.file_name
-            print('file name: ' + name_file)
+            # print('file name: ' + name_file)
             path = 'C:/Users/ArVip/Desktop/1/' + name_file
             with open(path, 'wb') as new_file:
                 new_file.write(downloaded_file)
@@ -199,25 +197,22 @@ def document(message):
                     f.extractall('C:/Users/ArVip/Desktop/1/')
                     for item in f.infolist():
                         name_file = item.filename
-            # with ZipFile(f'C:/Users/ArVip/Desktop/1/' + name_file, 'r') as f:
-            #     f.extractall('C:/Users/ArVip/Desktop/1/')
-            #     for item in f.infolist():
-            #         name_file = item.filename
-            print('path: ' + path)
-            print(f'name_file_test: {name_file}')
+
+            # print('path: ' + path)
+            # print(f'name_file_test: {name_file}')
 
 
-            print('executing main')
+            # print('executing main')
             connect = sqlite3.connect('users.db')
             cursor = connect.cursor()
 
             cursor.execute(f"SELECT flag FROM login_id WHERE id = {user_id}")
             data_flag = cursor.fetchone()
-            print(data_flag[0])
+            # print(data_flag[0])
 
 
             path = 'C:/Users/ArVip/Desktop/1/' + name_file
-            print('path to main', path)
+            # print('path to main', path)
 
             start_time_bot = datetime.now()
             bot.send_message(message.chat.id, main(path, data_flag[0], name_file))

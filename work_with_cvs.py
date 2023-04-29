@@ -63,6 +63,7 @@ def find(new_dict_new, new_find_value, return_list, index):
                     return_list.insert(index, l["text"])
                 else:
                     return_list.insert(index, "NULL")
+                break
     else:
         return_list.insert(index, "NULL")
 
